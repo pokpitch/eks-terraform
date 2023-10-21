@@ -12,27 +12,27 @@ Before we begin, you should have the following prerequisites in place:
 
 ## Step 1: Define Your Infrastructure
 
-In this step, we will define our infrastructure using custom Terraform modules tailored to our specific requirements. These modules streamline the deployment process, making it more efficient and adaptable to your needs. We will dive into the details of the "eks" module, which plays a pivotal role in creating our Kubernetes cluster.
+In this step, we will define our infrastructure using custom Terraform modules tailored to our specific requirements. These modules streamline the deployment process, making it more efficient and adaptable to your needs.
 
-**1.1 Custom Terraform Modules**
+### Custom Terraform Modules
 
 Before we proceed, let's introduce the custom Terraform modules we've created to enhance the modularity of our infrastructure definition. These modules include:
 
-- **Network Module:** This module handles VPC, subnet configurations, and related network components, ensuring network isolation and security.
+- **Network Module:** This module handles VPC, subnet configurations, and related network components, ensuring network isolation.
 
 - **Security Group Module:** The security group module facilitates the definition and management of security groups, which are essential for controlling inbound and outbound traffic to our resources securely.
 
 - **EKS Module:** The EKS module, the star of this article, is responsible for creating and configuring the Amazon Elastic Kubernetes Service (EKS) cluster. It orchestrates the setup of our Kubernetes environment, complete with worker nodes, control plane, and necessary components.
 
-**1.2 Exploring the EKS Module**
+### Exploring the EKS Module
 
-In this section, we will delve into the "eks" module, a critical component in managing our EKS cluster. The "eks" module is responsible for configuring and deploying the Amazon Elastic Kubernetes Service (EKS) cluster. It consists of several primary components and configurations that are pivotal for achieving a well-orchestrated Kubernetes environment:
+In this section, we will delve into the **eks module**, a critical component in managing our EKS cluster. The **eks module** is responsible for configuring and deploying the Amazon Elastic Kubernetes Service (EKS) cluster. It consists of several primary components and configurations that are pivotal for achieving a well-orchestrated Kubernetes environment:
 
-**1.2.1 Creating the EKS Cluster**
+**Creating the EKS Cluster**
 
 To initiate our EKS cluster, we employ the `aws_eks_cluster` resource. This resource requires specific parameters to define the cluster's characteristics. Let's take a closer look at the key attributes:
 
-- **Name:** This parameter represents the name of our EKS cluster, serving as a unique identifier within the AWS environment.
+- **Name:** This parameter represents the name of our EKS cluster.
 
 - **Role ARN:** The ARN (Amazon Resource Name) of the IAM role assigned to the EKS cluster. This role is responsible for granting the necessary permissions to manage and operate the cluster. 
 
@@ -78,7 +78,7 @@ The `aws_eks_node_group` resource focuses on managing the EKS node group within 
 
 - **Instance Types:** The types of instances used by the node group.
 
-- **Capacity Type:** Defining the capacity type for instances, which can be "ON_DEMAND" or "SPOT."
+- **Capacity Type:** Defining the capacity type for instances, which can be **ON_DEMAND** or **SPOT.**
 
 The `scaling_config` block allows us to specify the desired, maximum, and minimum size of the node group. Tags can be used to provide additional metadata for resource management.
 
@@ -124,7 +124,19 @@ resource "aws_eks_addon" "addons" {
 
 **1.2.4 Role Configuration**
 
-The definition of necessary IAM roles for the EKS cluster is organized in the "role.tf" file. These roles are integral in granting permissions required for the operation of the cluster. To access the ARNs (Amazon Resource Names) of these roles, we utilize the `data "aws_iam_role"` data sources:
+Properly configuring IAM roles with the right policies is a critical step in the setup of your EKS cluster. These IAM roles are essential for granting the necessary permissions for the operation of the cluster and its worker nodes. Before moving forward, ensure that you've created the following IAM roles with their corresponding policies:
+
+1. **EKS-WORKER-NODE-ROLE**:
+   - **Policies**:
+     - AmazonEC2ContainerRegistryReadOnly
+     - AmazonEKS_CNI_Policy
+     - AmazonEKSWorkerNodePolicy
+
+2. **EksClusterRole**:
+   - **Policies**:
+     - AmazonEKSClusterPolicy
+
+In the Terraform configuration, we use the `data "aws_iam_role"` data sources to access the Amazon Resource Names (ARNs) of these roles:
 
 ```hcl
 data "aws_iam_role" "eks_role" {
@@ -132,9 +144,11 @@ data "aws_iam_role" "eks_role" {
 }
 
 data "aws_iam_role" "node_role" {
-  name = "EKS-WORKER6NODE-ROLE"
+  name = "EKS-WORKER-NODE-ROLE"
 }
 ```
+
+It's important to create these roles and attach the specified policies to them before proceeding with the EKS cluster deployment. These roles and policies are fundamental in ensuring your EKS cluster functions correctly, and they provide the necessary permissions for the cluster and its worker nodes.
 
 **1.2.5 Variables Configuration**
 
@@ -205,8 +219,6 @@ variable "addons" {
   ]
 }
 ```
-
-In the grand scheme of our infrastructure, these variables and configurations within the "eks" module allow for a highly adaptable and manageable EKS cluster, tailored to your specific needs.
 
 **Step 2: Deploying Your Infrastructure**
 
