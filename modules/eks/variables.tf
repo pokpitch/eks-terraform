@@ -55,3 +55,11 @@
       }
     ]
   }
+
+  variable "eks_role" {
+    description = ""
+  }
+
+  variable "node_role" {
+    description = ""
+  }

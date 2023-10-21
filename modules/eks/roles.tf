@@ -1,7 +1,7 @@
 data "aws_iam_role" "eks_role" {
-  name = "EksClusterRole"
+  name = var.eks_role
 }
 
 data "aws_iam_role" "node_role" {
-  name = "EKS-WORKER6NODE-ROLE"
+  name = var.node_role
 }

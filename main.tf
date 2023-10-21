@@ -33,5 +33,7 @@ module "eks" {
   desired_size           = 1
   max_size               = 2
   min_size               = 1
+  eks_role               = "EksClusterRole"
+  node_role              = "EKS-WORKER-NODE-ROLE"
 
 }

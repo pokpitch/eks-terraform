@@ -64,7 +64,7 @@ resource "aws_eks_cluster" "cluster" {
 }
 ```
 
-**1.2.2 EKS Node Group**
+**EKS Node Group**
 
 The `aws_eks_node_group` resource focuses on managing the EKS node group within the cluster. It plays a pivotal role in determining the characteristics of the worker nodes in the EKS cluster. Key parameters of this resource include:
 
@@ -108,7 +108,7 @@ resource "aws_eks_node_group" "node_group" {
 }
 ```
 
-**1.2.3 Managing Add-ons**
+**Managing Add-ons**
 
 We can efficiently manage Kubernetes add-ons using the `aws_eks_addon` resource. This resource enables you to specify and configure add-ons for the EKS cluster. It allows you to define add-ons, their versions, and how conflicts are resolved when creating add-ons.
 
@@ -122,33 +122,19 @@ resource "aws_eks_addon" "addons" {
 }
 ```
 
-**1.2.4 Role Configuration**
-
-Properly configuring IAM roles with the right policies is a critical step in the setup of your EKS cluster. These IAM roles are essential for granting the necessary permissions for the operation of the cluster and its worker nodes. Before moving forward, ensure that you've created the following IAM roles with their corresponding policies:
-
-1. **EKS-WORKER-NODE-ROLE**:
-   - **Policies**:
-     - AmazonEC2ContainerRegistryReadOnly
-     - AmazonEKS_CNI_Policy
-     - AmazonEKSWorkerNodePolicy
-
-2. **EksClusterRole**:
-   - **Policies**:
-     - AmazonEKSClusterPolicy
+**Role Configuration**
 
 In the Terraform configuration, we use the `data "aws_iam_role"` data sources to access the Amazon Resource Names (ARNs) of these roles:
 
 ```hcl
 data "aws_iam_role" "eks_role" {
-  name = "EksClusterRole"
+  name = var.eks_role
 }
 
 data "aws_iam_role" "node_role" {
-  name = "EKS-WORKER-NODE-ROLE"
+  name = var.node_role
 }
 ```
-
-It's important to create these roles and attach the specified policies to them before proceeding with the EKS cluster deployment. These roles and policies are fundamental in ensuring your EKS cluster functions correctly, and they provide the necessary permissions for the cluster and its worker nodes.
 
 **1.2.5 Variables Configuration**
 
@@ -218,6 +204,13 @@ variable "addons" {
     }
   ]
 }
+  variable "eks_role" {
+    description = ""
+  }
+
+  variable "node_role" {
+    description = ""
+  }
 ```
 
 **Step 2: Deploying Your Infrastructure**
@@ -259,13 +252,25 @@ module "eks" {
   desired_size           = 1
   max_size               = 2
   min_size               = 1
+  eks_role               = "EksClusterRole"
+  node_role              = "EKS-WORKER-NODE-ROLE"
 }
 ```
+Before you proceed with the code, it is crucial to ensure that you've created the following IAM roles with their corresponding policies in your AWS console:
+
+- **EKS-WORKER-NODE-ROLE**:
+   - **Policies**:
+     - AmazonEC2ContainerRegistryReadOnly
+     - AmazonEKS_CNI_Policy
+     - AmazonEKSWorkerNodePolicy
+
+- **EksClusterRole**:
+   - **Policies**:
+     - AmazonEKSClusterPolicy
 
 With this code, you are initiating the deployment of your infrastructure. The `module "network"` sets up your VPC, subnets, and routing, while `module "security"` configures the necessary security groups. Finally, `module "eks"` orchestrates the creation of your EKS cluster, specifying details like the cluster name, instance types, desired scaling sizes, and more.
 
 Once you apply this Terraform configuration, the AWS resources described in your modules will be created, and your EKS cluster will begin to take shape. In the following steps, we will dive into deploying Nginx on this cluster and explore additional best practices for optimizing your setup.
-
 
 **Step 3: Deploying Nginx on Your EKS Cluster**
 
@@ -279,7 +284,7 @@ kind: Deployment
 metadata:
   name: nginx-deployment
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: nginx
@@ -291,19 +296,21 @@ spec:
       containers:
         - name: nginx
           image: nginx:latest
+          ports:
+            - containerPort: 80
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: nginx-service
 spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 80
   selector:
     app: nginx
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
-  type: LoadBalancer
 ```
 
 This manifest defines a Kubernetes Deployment and Service for Nginx. It deploys two replicas of the Nginx container and creates a LoadBalancer service to expose it externally.
@@ -363,9 +370,4 @@ You have now successfully deployed Nginx on your EKS cluster and made it accessi
 
 In this article, we've shown you how to create an EKS cluster and deploy Nginx using Terraform. This automation simplifies the management of your Kubernetes infrastructure and applications. With Terraform, you can easily scale and update your EKS cluster and applications as your needs evolve.
 
-By following these steps, you'll have a fully operational EKS cluster running Nginx. You can extend this setup to deploy more complex applications and integrate it into your CI/CD pipelines for continuous deployment.
-
-Remember to regularly update your infrastructure code to stay in sync with your evolving requirements and take advantage of Terraform's version control and collaboration features.
-
-Happy Terraforming and Kubernetes orchestrating!
 
