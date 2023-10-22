@@ -138,12 +138,10 @@ data "aws_iam_role" "node_role" {
 
 **1.2.5 Variables Configuration**
 
-In our "variables.tf" file, we specify and describe the variables required for configuring the EKS module. These variables cover various aspects, from cluster name and public subnets to instance types and add-ons. Properly configuring these variables ensures the EKS module adapts to your specific requirements.
+In our **variables.tf** file, we specify and describe the variables required for configuring the EKS module. These variables cover various aspects, from cluster name and public subnets to instance types and add-ons. Properly configuring these variables ensures the EKS module adapts to your specific requirements.
 
 ```hcl
-variable
-
- "cluster_name" {
+variable "cluster_name" {
   description = "A unique name for the EKS cluster."
 }
 
@@ -272,11 +270,22 @@ With this code, you are initiating the deployment of your infrastructure. The `m
 
 Once you apply this Terraform configuration, the AWS resources described in your modules will be created, and your EKS cluster will begin to take shape. In the following steps, we will dive into deploying Nginx on this cluster and explore additional best practices for optimizing your setup.
 
+```
+terraform init
+```
+```
+terraform apply -auto-approve
+```
+
+![eks-cluster](./images/eks-cluster.png)
+
+![node-group](./images/node-group.png)
+
 **Step 3: Deploying Nginx on Your EKS Cluster**
 
 In this step, we will connect to the AWS console and use Cloud Shell to deploy Nginx on our EKS cluster. Before you begin, ensure you have the AWS CLI and kubectl configured. We will use the following Kubernetes manifest to deploy Nginx:
 
-**nginx-manifest.yaml:**
+**nginx.yml**
 
 ```yaml
 apiVersion: apps/v1
@@ -313,7 +322,7 @@ spec:
     app: nginx
 ```
 
-This manifest defines a Kubernetes Deployment and Service for Nginx. It deploys two replicas of the Nginx container and creates a LoadBalancer service to expose it externally.
+This manifest defines a Kubernetes Deployment and Service for Nginx. It deploys three replicas of the Nginx container and creates a LoadBalancer service to expose it externally.
 
 Follow these steps to deploy Nginx on your EKS cluster:
 
@@ -324,15 +333,15 @@ Follow these steps to deploy Nginx on your EKS cluster:
 3. **Configure kubectl**: If you haven't already, configure `kubectl` to use your EKS cluster by running:
 
    ```bash
-   aws eks update-kubeconfig --name your-eks-cluster-name
+   aws eks update-kubeconfig --region eu-north-1 --name eks-nginx
    ```
 
-   Replace `your-eks-cluster-name` with the name of your EKS cluster.
+![cloud-shell](./images/cloud-shell-1.png)
 
 4. **Apply the Manifest**: Deploy the Nginx Deployment and Service by running:
 
    ```bash
-   kubectl apply -f nginx-manifest.yaml
+   kubectl apply -f nginx.yml
    ```
 
    This command applies the Kubernetes manifest and deploys Nginx on your EKS cluster.
@@ -340,34 +349,23 @@ Follow these steps to deploy Nginx on your EKS cluster:
 5. **Check Deployment Status**: Verify the deployment's status using the following command:
 
    ```bash
-   kubectl get deployments
+   kubectl get all
    ```
 
    You should see the `nginx-deployment` with the desired number of replicas.
 
-6. **Expose the Service**: To make Nginx accessible externally, you can expose the service as a LoadBalancer:
-
-   ```bash
-   kubectl expose deployment nginx-deployment --type=LoadBalancer --name=nginx-service
-   ```
-
-   This command creates a LoadBalancer service.
-
-7. **Retrieve LoadBalancer Endpoint**: To find the external endpoint, use the following command:
-
-   ```bash
-   kubectl get svc nginx-service
-   ```
-
    You'll see an external IP address under the `EXTERNAL-IP` column.
+
+![cloud-shell](./images/cloud-shell-2.png)
+
 
 8. **Access Nginx**: Open a web browser and enter the external IP address. You should be able to access the Nginx welcome page.
 
-You have now successfully deployed Nginx on your EKS cluster and made it accessible via a LoadBalancer service. This demonstrates the power and flexibility of managing Kubernetes workloads on AWS EKS. You can continue to scale, update, and manage your applications as needed on your EKS cluster.
+![nginx](./images/nginx.png)
 
+You have now successfully deployed Nginx on your EKS cluster and made it accessible via a LoadBalancer service. 
 
 ## Conclusion
 
 In this article, we've shown you how to create an EKS cluster and deploy Nginx using Terraform. This automation simplifies the management of your Kubernetes infrastructure and applications. With Terraform, you can easily scale and update your EKS cluster and applications as your needs evolve.
-
 
