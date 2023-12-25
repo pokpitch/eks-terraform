@@ -78,7 +78,7 @@ The `aws_eks_node_group` resource focuses on managing the EKS node group within 
 
 - **Instance Types:** The types of instances used by the node group.
 
-- **Capacity Type:** Defining the capacity type for instances, which can be **ON_DEMAND** or **SPOT.**
+- **Capacity Type:** Defining the capacity type for instances, which can be **ON_DEMAND** or **SPOT**.
 
 The `scaling_config` block allows us to specify the desired, maximum, and minimum size of the node group. Tags can be used to provide additional metadata for resource management.
 
@@ -136,7 +136,7 @@ data "aws_iam_role" "node_role" {
 }
 ```
 
-**1.2.5 Variables Configuration**
+**Variables Configuration**
 
 In our **variables.tf** file, we specify and describe the variables required for configuring the EKS module. These variables cover various aspects, from cluster name and public subnets to instance types and add-ons. Properly configuring these variables ensures the EKS module adapts to your specific requirements.
 
@@ -211,7 +211,7 @@ variable "addons" {
   }
 ```
 
-**Step 2: Deploying Your Infrastructure**
+## Step 2: Deploying Your Infrastructure
 
 Now that we've defined our infrastructure using the custom Terraform modules, we're ready to deploy it. In this step, we'll execute the code that sets up our EKS cluster and related resources. Here's the code that deploys the infrastructure:
 
@@ -281,7 +281,9 @@ terraform apply -auto-approve
 
 ![node-group](./images/node-group.png)
 
-**Step 3: Deploying Nginx on Your EKS Cluster**
+The complete source code of the project is available on [GitHub](https://github.com/kemanedonfack/eks-terraform).
+
+## Step 3: Deploying Nginx on Your EKS Cluster
 
 In this step, we will connect to the AWS console and use Cloud Shell to deploy Nginx on our EKS cluster. Before you begin, ensure you have the AWS CLI and kubectl configured. We will use the following Kubernetes manifest to deploy Nginx:
 
