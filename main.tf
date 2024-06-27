@@ -5,7 +5,7 @@ module "network" {
   igw_name                   = "eks-gw"
   public_subnet_cidr_blocks  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   private_subnet_cidr_blocks = ["10.0.4.0/24", "10.0.5.0/24"]
-  availability_zones         = ["eu-north-1a", "eu-north-1b"]
+  availability_zones         = ["ap-southeast-2a", "ap-southeast-2b"]
   public_subnet_name_prefix  = "eks-public-subnet"
   private_subnet_name_prefix = "eks-private-subnet"
   public_rt_name             = "eks-public-rt"
@@ -29,7 +29,7 @@ module "eks" {
   security_group_ids     = [module.security.security_group_id]
   endpoint_public_access = true
   node_group_name        = "green"
-  instance_types         = ["t3.medium"]
+  instance_types         = ["t3.small"]
   desired_size           = 1
   max_size               = 2
   min_size               = 1
