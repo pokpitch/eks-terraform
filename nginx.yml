@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: nginx-deployment
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: nginx
@@ -32,6 +32,6 @@ spec:
     app: nginx
 
 # rm .kube/config
-# aws eks update-kubeconfig --region eu-north-1 --name eks-nginx
+# aws eks update-kubeconfig --region ap-southeast-2 --name eks-nginx
 # aws s3 cp s3://virtual-tours-aws-s3-test/nginx.yml .
 
